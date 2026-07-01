@@ -155,7 +155,7 @@ Every library option surfaces as a typed prop. Absent props are not forwarded, s
 
 - **Audio source** — `url`, `src` (alias), `audioMode`, `preload`
 - **Waveform** — `waveformStyle`, `height`, `samples`, `barWidth`, `barSpacing`, `barRadius`, `waveform`
-- **Colours** — `colorPreset`, `waveformColor`, `progressColor`, `buttonColor`, … (strings, or `string[]` for gradients)
+- **Colours** — `colorPreset`, `waveformColor`, `progressColor`, `waveformGradient` (strings, or `string[]` for gradients). The DOM chrome (button, title, meta text) is themed via CSS variables — `--wfp-button-color`, `--wfp-text-color`, `--wfp-text-secondary-color` — not JS options; override them in your own CSS.
 - **Playback / UI** — `playbackRate`, `showPlaybackSpeed`, `playbackRates`, `showControls`, `showInfo`, `showTime`, `showHoverTime`, `showBPM`, `buttonAlign`, `accessibleSeek`, `seekLabel`, `errorText`
 - **Markers / metadata** — `markers`, `showMarkers`, `title`, `artist`, `artwork`, `album`
 - **Behaviour / icons** — `autoplay`, `singlePlay`, `playOnSeek`, `enableMediaSession`, `playIcon`, `pauseIcon`
