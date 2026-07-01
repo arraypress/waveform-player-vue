@@ -48,7 +48,7 @@ The wrapper does **not** import the CSS for you — your bundler should own that
 <WaveformPlayer
   url="/audio/track.mp3"
   title="Midnight Dreams"
-  subtitle="The Wavelength"
+  artist="The Wavelength"
   artwork="/img/cover.jpg"
   waveform-style="bars"
   :bar-width="3"
@@ -157,7 +157,7 @@ Every library option surfaces as a typed prop. Absent props are not forwarded, s
 - **Waveform** — `waveformStyle`, `height`, `samples`, `barWidth`, `barSpacing`, `barRadius`, `waveform`
 - **Colours** — `colorPreset`, `waveformColor`, `progressColor`, `buttonColor`, … (strings, or `string[]` for gradients)
 - **Playback / UI** — `playbackRate`, `showPlaybackSpeed`, `playbackRates`, `showControls`, `showInfo`, `showTime`, `showHoverTime`, `showBPM`, `buttonAlign`, `accessibleSeek`, `seekLabel`, `errorText`
-- **Markers / metadata** — `markers`, `showMarkers`, `title`, `subtitle`, `artwork`, `album`
+- **Markers / metadata** — `markers`, `showMarkers`, `title`, `artist`, `artwork`, `album`
 - **Behaviour / icons** — `autoplay`, `singlePlay`, `playOnSeek`, `enableMediaSession`, `playIcon`, `pauseIcon`
 
 ## TypeScript

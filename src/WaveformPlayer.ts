@@ -138,7 +138,7 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 
 	/* Content metadata */
 	set('title', p.title);
-	set('subtitle', p.subtitle);
+	set('artist', p.artist);
 	set('artwork', p.artwork);
 	set('album', p.album);
 
@@ -230,7 +230,7 @@ export const WaveformPlayer = defineComponent({
 
 		// ── Content metadata ───────────────────────────────────────────
 		title: { type: String, default: undefined },
-		subtitle: { type: String, default: undefined },
+		artist: { type: String, default: undefined },
 		artwork: { type: String, default: undefined },
 		album: { type: String, default: undefined },
 
@@ -355,7 +355,7 @@ export const WaveformPlayer = defineComponent({
 				props.markers,
 				props.showMarkers,
 				props.title,
-				props.subtitle,
+				props.artist,
 				props.artwork,
 				props.album,
 				props.autoplay,
@@ -405,11 +405,11 @@ export const WaveformPlayer = defineComponent({
 			async loadTrack(
 				url: string,
 				title?: string,
-				subtitle?: string,
+				artist?: string,
 				options?: Record<string, unknown>
 			) {
 				if (!instance?.loadTrack) return;
-				await instance.loadTrack(url, title, subtitle, options);
+				await instance.loadTrack(url, title, artist, options);
 			},
 			get instance() {
 				return instance as unknown as WaveformPlayerInstance | null;

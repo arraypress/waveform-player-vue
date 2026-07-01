@@ -45,7 +45,7 @@ const trackUrl = ref('/audio/track-1.mp3');
 	<WaveformPlayer
 		url="/audio/track.mp3"
 		title="Midnight Dreams"
-		subtitle="The Wavelength"
+		artist="The Wavelength"
 		artwork="/img/cover.jpg"
 		waveform-style="bars"
 		:bar-width="3"

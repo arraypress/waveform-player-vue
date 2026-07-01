@@ -24,7 +24,7 @@ Initial release.
   - UI toggles (`showControls`, `showInfo`, `showTime`, `showHoverTime`,
     `showBPM`, `buttonAlign`, `accessibleSeek`, `seekLabel`, `errorText`)
   - Markers (`markers`, `showMarkers`)
-  - Metadata (`title`, `subtitle`, `artwork`, `album`)
+  - Metadata (`title`, `artist`, `artwork`, `album`)
   - Behaviour (`autoplay`, `singlePlay`, `playOnSeek`,
     `enableMediaSession`)
   - Icons (`playIcon`, `pauseIcon`)
