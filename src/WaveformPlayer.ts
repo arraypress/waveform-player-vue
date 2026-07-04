@@ -122,9 +122,13 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 	/* Accessibility */
 	set('accessibleSeek', p.accessibleSeek);
 	set('seekLabel', p.seekLabel);
+	set('seekValueText', p.seekValueText);
+	set('playPauseLabel', p.playPauseLabel);
+	set('speedLabel', p.speedLabel);
 
 	/* Error UI */
 	set('errorText', p.errorText);
+	set('unknownTrackText', p.unknownTrackText);
 
 	/* Markers */
 	set('markers', p.markers);
@@ -134,6 +138,7 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 	set('title', p.title);
 	set('artist', p.artist);
 	set('artwork', p.artwork);
+	set('artworkAlt', p.artworkAlt);
 	set('album', p.album);
 
 	/* Behaviour */
@@ -208,9 +213,13 @@ export const WaveformPlayer = defineComponent({
 		// ── Accessibility ──────────────────────────────────────────────
 		accessibleSeek: { type: Boolean, default: undefined },
 		seekLabel: { type: String, default: undefined },
+		seekValueText: { type: String, default: undefined },
+		playPauseLabel: { type: String, default: undefined },
+		speedLabel: { type: String, default: undefined },
 
 		// ── Error UI ───────────────────────────────────────────────────
 		errorText: { type: String, default: undefined },
+		unknownTrackText: { type: String, default: undefined },
 
 		// ── Markers ────────────────────────────────────────────────────
 		markers: { type: Array as PropType<WaveformMarker[]>, default: undefined },
@@ -220,6 +229,7 @@ export const WaveformPlayer = defineComponent({
 		title: { type: String, default: undefined },
 		artist: { type: String, default: undefined },
 		artwork: { type: String, default: undefined },
+		artworkAlt: { type: String, default: undefined },
 		album: { type: String, default: undefined },
 
 		// ── Behaviour ──────────────────────────────────────────────────
@@ -333,12 +343,17 @@ export const WaveformPlayer = defineComponent({
 				props.buttonSize,
 				props.accessibleSeek,
 				props.seekLabel,
+				props.seekValueText,
+				props.playPauseLabel,
+				props.speedLabel,
 				props.errorText,
+				props.unknownTrackText,
 				props.markers,
 				props.showMarkers,
 				props.title,
 				props.artist,
 				props.artwork,
+				props.artworkAlt,
 				props.album,
 				props.autoplay,
 				props.singlePlay,
