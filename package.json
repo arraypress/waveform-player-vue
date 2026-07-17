@@ -1,6 +1,6 @@
 {
   "name": "@arraypress/waveform-player-vue",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Vue 3 component wrapper for @arraypress/waveform-player — typed props for every option, event emits, an exposed imperative API, and SSR-safe mounting.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -72,7 +72,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@arraypress/waveform-player": "^1.20.0",
+    "@arraypress/waveform-player": "^1.22.0",
     "@vue/test-utils": "^2.4.6",
     "jsdom": "^29.1.1",
     "tsup": "^8.5.1",

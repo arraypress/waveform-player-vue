@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.0] — 2026-07-17
+
+### Added
+
+- **`buttonRadius` and `artworkPosition` props.** Exposes the two options added
+  in `@arraypress/waveform-player` 1.22.0: `buttonRadius` sets the play button's
+  corner radius (`0` for square, or any CSS length), and `artworkPosition`
+  (`'info'` | `'button'`) chooses whether the cover renders in the info row or
+  becomes the play button itself.
+
+  Both prop *types* already flowed through automatically, since the props derive
+  from the core's `WaveformPlayerOptions` — but the options mapping is written by hand, so
+  until now they would have type-checked and then silently done nothing. Tests
+  now cover the mapping for exactly that reason.
+
+  The peer range stays `^1.20.0`: the props only appear once the consumer's own
+  core is on 1.22.0, so nothing breaks on an older one.
+
+### Fixed
+
+- **`buttonSize` accepts a number again.** The prop was declared `type: String`,
+  so `:button-size="64"` failed Vue's runtime type check and warned, even though
+  the core accepts a number (px) or a unit string. It now declares
+  `[String, Number]`, matching the core. `buttonRadius` takes the same pair.
+
 ## [0.3.0] — 2026-07-05
 
 ### Added

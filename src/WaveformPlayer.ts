@@ -48,8 +48,18 @@ import type {
 	ColorPreset,
 	WaveformMarker,
 	WaveformPeaks,
+	WaveformPlayerOptions,
 	WaveformStyle,
 } from '@arraypress/waveform-player';
+
+/**
+ * Vue's runtime prop declarations need an explicit `PropType`, but the core
+ * declares `artworkPosition` inline rather than exporting a named union the way
+ * it does for `ButtonAlign`/`WaveformStyle`. Derive it from the option type
+ * instead of restating `'info' | 'button'` here, so a new placement in the core
+ * can't leave this wrapper silently behind.
+ */
+type ArtworkPosition = NonNullable<WaveformPlayerOptions['artworkPosition']>;
 
 /** Minimal structural view of the methods the wrapper calls. */
 type PlayerInstance = {
@@ -118,6 +128,7 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 	set('layout', p.layout);
 	set('buttonStyle', p.buttonStyle);
 	set('buttonSize', p.buttonSize);
+	set('buttonRadius', p.buttonRadius);
 
 	/* Accessibility */
 	set('accessibleSeek', p.accessibleSeek);
@@ -139,6 +150,7 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 	set('artist', p.artist);
 	set('artwork', p.artwork);
 	set('artworkAlt', p.artworkAlt);
+	set('artworkPosition', p.artworkPosition);
 	set('album', p.album);
 
 	/* Behaviour */
@@ -208,7 +220,11 @@ export const WaveformPlayer = defineComponent({
 		buttonAlign: { type: String as PropType<ButtonAlign>, default: undefined },
 		layout: { type: String, default: undefined },
 		buttonStyle: { type: String, default: undefined },
-		buttonSize: { type: String, default: undefined },
+		// The core accepts a number (px) or a unit string, so both must be
+		// declared — a String-only prop makes `:button-size="64"` fail Vue's
+		// runtime type check and warn, even though the core handles it.
+		buttonSize: { type: [String, Number], default: undefined },
+		buttonRadius: { type: [String, Number], default: undefined },
 
 		// ── Accessibility ──────────────────────────────────────────────
 		accessibleSeek: { type: Boolean, default: undefined },
@@ -230,6 +246,7 @@ export const WaveformPlayer = defineComponent({
 		artist: { type: String, default: undefined },
 		artwork: { type: String, default: undefined },
 		artworkAlt: { type: String, default: undefined },
+		artworkPosition: { type: String as PropType<ArtworkPosition>, default: undefined },
 		album: { type: String, default: undefined },
 
 		// ── Behaviour ──────────────────────────────────────────────────
@@ -341,6 +358,7 @@ export const WaveformPlayer = defineComponent({
 				props.layout,
 				props.buttonStyle,
 				props.buttonSize,
+				props.buttonRadius,
 				props.accessibleSeek,
 				props.seekLabel,
 				props.seekValueText,
@@ -354,6 +372,7 @@ export const WaveformPlayer = defineComponent({
 				props.artist,
 				props.artwork,
 				props.artworkAlt,
+				props.artworkPosition,
 				props.album,
 				props.autoplay,
 				props.singlePlay,

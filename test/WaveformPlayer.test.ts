@@ -159,4 +159,41 @@ describe('WaveformPlayer (Vue)', () => {
 		expect(el.classList.contains('custom')).toBe(true);
 		expect(el.id).toBe('player-1');
 	});
+
+	// These props type-check for free (the Props type derives from the core's
+	// WaveformPlayerOptions), but options are mapped by hand — so a prop that
+	// isn't declared and `set()` type-checks and then silently does nothing.
+	// That failure is invisible without these.
+	it('maps buttonRadius, including 0', async () => {
+		mount(WaveformPlayer, { props: { url: '/a.mp3', buttonRadius: 0 } });
+		await flushPromises();
+		expect(instances[0].opts.buttonRadius).toBe(0);
+	});
+
+	it('accepts a numeric buttonSize without a prop-type warning', async () => {
+		// Declared String-only, a number here failed Vue's runtime check and
+		// warned, even though the core takes number (px) or a unit string.
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		mount(WaveformPlayer, { props: { url: '/a.mp3', buttonSize: 64 } });
+		await flushPromises();
+
+		expect(instances[0].opts.buttonSize).toBe(64);
+		expect(warn.mock.calls.flat().join(' ')).not.toMatch(/Invalid prop/i);
+		warn.mockRestore();
+	});
+
+	it('maps artworkPosition', async () => {
+		mount(WaveformPlayer, {
+			props: { url: '/a.mp3', artwork: '/c.jpg', artworkPosition: 'button' },
+		});
+		await flushPromises();
+		expect(instances[0].opts.artworkPosition).toBe('button');
+	});
+
+	it('omits both when unset, so the core defaults apply', async () => {
+		mount(WaveformPlayer, { props: { url: '/a.mp3' } });
+		await flushPromises();
+		expect('buttonRadius' in instances[0].opts).toBe(false);
+		expect('artworkPosition' in instances[0].opts).toBe(false);
+	});
 });
