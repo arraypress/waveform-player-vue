@@ -190,6 +190,18 @@ describe('WaveformPlayer (Vue)', () => {
 		expect(instances[0].opts.artworkPosition).toBe('button');
 	});
 
+	it('maps crossOrigin when set', async () => {
+		mount(WaveformPlayer, { props: { url: '/a.mp3', crossOrigin: 'anonymous' } });
+		await flushPromises();
+		expect(instances[0].opts.crossOrigin).toBe('anonymous');
+	});
+
+	it('omits crossOrigin when unset, so the core default (native <audio>) applies', async () => {
+		mount(WaveformPlayer, { props: { url: '/a.mp3' } });
+		await flushPromises();
+		expect('crossOrigin' in instances[0].opts).toBe(false);
+	});
+
 	it('omits both when unset, so the core defaults apply', async () => {
 		mount(WaveformPlayer, { props: { url: '/a.mp3' } });
 		await flushPromises();

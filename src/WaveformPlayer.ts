@@ -44,6 +44,7 @@ import type { WaveformPlayer as WaveformPlayerInstance } from '@arraypress/wavef
 import type {
 	AudioMode,
 	AudioPreload,
+	AudioCrossOrigin,
 	ButtonAlign,
 	ColorPreset,
 	WaveformMarker,
@@ -97,6 +98,7 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 	else if (p.src !== undefined) opts.url = p.src;
 	set('audioMode', p.audioMode);
 	set('preload', p.preload);
+	set('crossOrigin', p.crossOrigin);
 
 	/* Waveform visualisation */
 	set('waveformStyle', p.waveformStyle);
@@ -190,6 +192,7 @@ export const WaveformPlayer = defineComponent({
 		src: { type: String, default: undefined },
 		audioMode: { type: String as PropType<AudioMode>, default: undefined },
 		preload: { type: String as PropType<AudioPreload>, default: undefined },
+		crossOrigin: { type: String as PropType<AudioCrossOrigin>, default: undefined },
 
 		// ── Waveform visualisation ─────────────────────────────────────
 		waveformStyle: { type: String as PropType<WaveformStyle>, default: undefined },
@@ -335,6 +338,7 @@ export const WaveformPlayer = defineComponent({
 				props.src,
 				props.audioMode,
 				props.preload,
+				props.crossOrigin,
 				props.waveformStyle,
 				props.height,
 				props.samples,

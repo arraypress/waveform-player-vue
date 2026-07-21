@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.5.0] — 2026-07-22
+
+### Added
+
+- **`crossOrigin` prop.** Exposes the option added in
+  `@arraypress/waveform-player@1.23.0`: sets the CORS mode of the underlying
+  `<audio>` (`'anonymous'` | `'use-credentials'`). Declared as a runtime prop
+  and omitted from the options bag by default so the player behaves like a
+  native `<audio>` and never forces a CORS request that would break CDN media
+  without `Access-Control-Allow-Origin`.
+
 ## [0.4.0] — 2026-07-17
 
 ### Added
