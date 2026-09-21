@@ -20,6 +20,11 @@ Typed props for every option, lifecycle `@events`, an exposed imperative API, an
 npm install @arraypress/waveform-player-vue @arraypress/waveform-player vue
 ```
 
+> **Requires `@arraypress/waveform-player` 1.27.0 or newer.** The component
+> loads the core library's `/no-autoinit` entry point, so that it never scans
+> the page for markup it doesn't own — that subpath was added in 1.27.0. If
+> you're upgrading this package on its own, bump the core alongside it.
+
 ```vue
 <script setup lang="ts">
 import { WaveformPlayer } from '@arraypress/waveform-player-vue';

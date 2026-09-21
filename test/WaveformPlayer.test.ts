@@ -37,7 +37,21 @@ class MockPlayer {
 	}
 }
 
-vi.mock('@arraypress/waveform-player', () => ({
+/**
+ * The package root must never be imported: it scans the whole document on
+ * import and mounts a player for every `[data-waveform-player]` it finds, which
+ * is markup this Vue app does not own. A mock factory only runs when its module is
+ * actually imported, so this throws if and only if the component reaches for
+ * the scanning entry point — turning a silent behaviour regression into a
+ * failure that names itself.
+ */
+vi.mock('@arraypress/waveform-player', () => {
+	throw new Error(
+		'[test] component imported the scanning entry point; it must import @arraypress/waveform-player/no-autoinit'
+	);
+});
+
+vi.mock('@arraypress/waveform-player/no-autoinit', () => ({
 	default: MockPlayer,
 	WaveformPlayer: MockPlayer,
 }));
