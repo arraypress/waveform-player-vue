@@ -10,7 +10,7 @@
  * emit forwarding, destroy-on-unmount, identity-prop re-mount, and the
  * exposed imperative API.
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 
 /** Captures every constructed instance so assertions can inspect them. */
@@ -57,6 +57,7 @@ vi.mock('@arraypress/waveform-player/no-autoinit', () => ({
 }));
 
 import { WaveformPlayer } from '../src';
+import type { WaveformPlayerProps } from '../src';
 
 beforeEach(() => {
 	instances.length = 0;
@@ -221,5 +222,86 @@ describe('WaveformPlayer (Vue)', () => {
 		await flushPromises();
 		expect('buttonRadius' in instances[0].opts).toBe(false);
 		expect('artworkPosition' in instances[0].opts).toBe(false);
+	});
+
+	// Typed on WaveformPlayerProps since core 1.18 / 1.17, but with no runtime
+	// prop declaration Vue treated them as fall-through attributes — they
+	// landed on the <div> and never reached the player.
+	it('maps waveformGradient and seekHandle (including false)', async () => {
+		const wrapper = mount(WaveformPlayer, {
+			props: { url: '/a.mp3', waveformGradient: 'horizontal', seekHandle: false },
+		});
+		await flushPromises();
+		expect(instances[0].opts.waveformGradient).toBe('horizontal');
+		expect(instances[0].opts.seekHandle).toBe(false);
+		const el = wrapper.find('div.wfp-host').element;
+		expect(el.hasAttribute('waveformgradient')).toBe(false);
+		expect(el.hasAttribute('seekhandle')).toBe(false);
+	});
+
+	it('omits waveformGradient and seekHandle when unset, so the core defaults apply', async () => {
+		mount(WaveformPlayer, { props: { url: '/a.mp3' } });
+		await flushPromises();
+		expect('waveformGradient' in instances[0].opts).toBe(false);
+		expect('seekHandle' in instances[0].opts).toBe(false);
+	});
+
+	it('re-mounts when waveformGradient or seekHandle changes', async () => {
+		const wrapper = mount(WaveformPlayer, {
+			props: { url: '/a.mp3', waveformGradient: 'horizontal', seekHandle: false },
+		});
+		await flushPromises();
+		await wrapper.setProps({ waveformGradient: 'diagonal' });
+		await flushPromises();
+		expect(instances).toHaveLength(2);
+		await wrapper.setProps({ seekHandle: true });
+		await flushPromises();
+		expect(instances).toHaveLength(3);
+		expect(instances[2].opts).toMatchObject({ waveformGradient: 'diagonal', seekHandle: true });
+	});
+
+	it('forwards @next-track / @previous-track as onNextTrack / onPreviousTrack', async () => {
+		const onNextTrack = vi.fn();
+		const onPreviousTrack = vi.fn();
+		mount(WaveformPlayer, { props: { url: '/a.mp3', onNextTrack, onPreviousTrack } });
+		await flushPromises();
+		const o = instances[0].opts as Record<string, (...args: unknown[]) => void>;
+		o.onNextTrack(instances[0]);
+		o.onPreviousTrack(instances[0]);
+		expect(onNextTrack).toHaveBeenCalledWith(instances[0]);
+		expect(onPreviousTrack).toHaveBeenCalledWith(instances[0]);
+	});
+
+	it('omits the track-nav callbacks with no listener, so no dead lock-screen buttons appear', async () => {
+		// The core registers the Media Session nexttrack/previoustrack action
+		// whenever the option is a function — so these can't be wired to an
+		// unconditional emit the way @play / @pause are.
+		mount(WaveformPlayer, { props: { url: '/a.mp3' } });
+		await flushPromises();
+		expect('onNextTrack' in instances[0].opts).toBe(false);
+		expect('onPreviousTrack' in instances[0].opts).toBe(false);
+	});
+
+	it('remounts when a track-nav listener is added, not when it is swapped', async () => {
+		const wrapper = mount(WaveformPlayer, { props: { url: '/a.mp3', onNextTrack: vi.fn() } });
+		await flushPromises();
+
+		const next2 = vi.fn();
+		await wrapper.setProps({ onNextTrack: next2 });
+		await flushPromises();
+		expect(instances).toHaveLength(1);
+		(instances[0].opts.onNextTrack as (i: unknown) => void)(instances[0]);
+		expect(next2).toHaveBeenCalledTimes(1);
+
+		await wrapper.setProps({ onPreviousTrack: vi.fn() });
+		await flushPromises();
+		expect(instances).toHaveLength(2);
+		expect(typeof instances[1].opts.onPreviousTrack).toBe('function');
+	});
+});
+
+describe('WaveformPlayer types (Vue)', () => {
+	it('keeps style as the fall-through CSS attribute, not the core waveformStyle alias', () => {
+		expectTypeOf<WaveformPlayerProps>().not.toHaveProperty('style');
 	});
 });

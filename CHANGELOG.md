@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Added
+
+- **`@next-track` / `@previous-track` (`onNextTrack` / `onPreviousTrack`
+  props).** Supplying one shows the lock-screen / system media controls' skip
+  button. The core options were already typed on `WaveformPlayerProps` but had
+  no runtime prop declaration, so they never reached the player and the buttons
+  never appeared. They're declared as function props rather than emits because
+  the wrapper has to know whether anyone is listening — the core shows the
+  button whenever the option is a function. Adding or removing one remounts the
+  player; swapping one handler for another doesn't.
+
+### Changed
+
+- **`WaveformPlayerProps` omits the core's `style`** (a shorthand alias for
+  `waveformStyle`), which typed `style` as a `WaveformStyle` while Vue applies
+  it as the fall-through CSS attribute. Matches the other wrappers: use
+  `waveformStyle` for the visual style.
+
+### Fixed
+
+- **`waveformGradient` and `seekHandle` now reach the player.** Both have been
+  typed props since the core added them (1.18.0 / 1.17.0), but with no runtime
+  prop declaration Vue treated them as fall-through attributes on the `<div>`.
+  Both are now declared, forwarded, and in the remount `watch()`.
+
 ## [0.6.0] — 2026-09-22
 
 ### Changed

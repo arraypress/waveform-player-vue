@@ -47,18 +47,24 @@ export type {
  *
  * Derived from the core library's `WaveformPlayerOptions` so every
  * library option is a typed prop automatically and stays in sync as
- * the core evolves. The core's callback options are omitted — Vue
+ * the core evolves. The core's lifecycle callbacks are omitted — Vue
  * surfaces those as `@load`, `@play`, `@pause`, `@end`,
  * `@timeupdate`, and `@error` emits instead (see `WaveformPlayerEmits`).
+ * `onNextTrack` / `onPreviousTrack` stay: they are real function props
+ * (bind them as `@next-track` / `@previous-track`), because the wrapper
+ * must know whether one is supplied — the core shows the lock-screen skip
+ * button whenever it is.
  *
  * `class`, `style`, and `id` are intentionally not listed: Vue's
  * attribute fall-through applies them to the root element
  * automatically (the base class `wfp-host` is always present and
- * merges with any consumer `class`).
+ * merges with any consumer `class`). The core's own `style` — a
+ * shorthand alias for `waveformStyle` — is omitted so it can't be
+ * mistaken for that attribute; use `waveformStyle`.
  */
 export type WaveformPlayerProps = Omit<
 	WaveformPlayerOptions,
-	'onLoad' | 'onPlay' | 'onPause' | 'onEnd' | 'onError' | 'onTimeUpdate'
+	'style' | 'onLoad' | 'onPlay' | 'onPause' | 'onEnd' | 'onError' | 'onTimeUpdate'
 >;
 
 /**

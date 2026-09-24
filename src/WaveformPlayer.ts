@@ -32,6 +32,7 @@
  * @module WaveformPlayer
  */
 import {
+	computed,
 	defineComponent,
 	h,
 	onBeforeUnmount,
@@ -61,6 +62,10 @@ import type {
  * can't leave this wrapper silently behind.
  */
 type ArtworkPosition = NonNullable<WaveformPlayerOptions['artworkPosition']>;
+/** Same reasoning as `ArtworkPosition`: the core declares this union inline. */
+type WaveformGradient = NonNullable<WaveformPlayerOptions['waveformGradient']>;
+/** Media Session track-navigation handler (`onNextTrack` / `onPreviousTrack`). */
+type TrackNavHandler = (instance: WaveformPlayerInstance) => void;
 
 /** Minimal structural view of the methods the wrapper calls. */
 type PlayerInstance = {
@@ -107,6 +112,7 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 	set('barWidth', p.barWidth);
 	set('barSpacing', p.barSpacing);
 	set('barRadius', p.barRadius);
+	set('waveformGradient', p.waveformGradient);
 	set('waveform', p.waveform);
 
 	/* Colours */
@@ -124,6 +130,7 @@ function buildLibraryOptions(p: Record<string, unknown>): Record<string, unknown
 	set('showInfo', p.showInfo);
 	set('showTime', p.showTime);
 	set('showHoverTime', p.showHoverTime);
+	set('seekHandle', p.seekHandle);
 	set('showBPM', p.showBPM);
 	set('bpm', p.bpm);
 	set('buttonAlign', p.buttonAlign);
@@ -201,6 +208,7 @@ export const WaveformPlayer = defineComponent({
 		barWidth: { type: Number, default: undefined },
 		barSpacing: { type: Number, default: undefined },
 		barRadius: { type: Number, default: undefined },
+		waveformGradient: { type: String as PropType<WaveformGradient>, default: undefined },
 		waveform: { type: [Array, String] as PropType<WaveformPeaks>, default: undefined },
 
 		// ── Colours (string, or string[] for gradients) ────────────────
@@ -218,6 +226,7 @@ export const WaveformPlayer = defineComponent({
 		showInfo: { type: Boolean, default: undefined },
 		showTime: { type: Boolean, default: undefined },
 		showHoverTime: { type: Boolean, default: undefined },
+		seekHandle: { type: Boolean, default: undefined },
 		showBPM: { type: Boolean, default: undefined },
 		bpm: { type: Number, default: undefined },
 		buttonAlign: { type: String as PropType<ButtonAlign>, default: undefined },
@@ -261,6 +270,17 @@ export const WaveformPlayer = defineComponent({
 		// ── Icons ──────────────────────────────────────────────────────
 		playIcon: { type: String, default: undefined },
 		pauseIcon: { type: String, default: undefined },
+
+		// ── Media Session track navigation ─────────────────────────────
+		// Declared as function props rather than emits so the wrapper can
+		// tell whether anyone is listening: the core registers the
+		// lock-screen skip button whenever the option is a function, so an
+		// unconditional emit would show buttons that do nothing. Vue maps
+		// `@next-track` / `@previous-track` listeners onto these props.
+		/** Media Session "next track" handler (`@next-track`). Shows the lock-screen skip-forward button. */
+		onNextTrack: { type: Function as PropType<TrackNavHandler>, default: undefined },
+		/** Media Session "previous track" handler (`@previous-track`). Shows the skip-back button. */
+		onPreviousTrack: { type: Function as PropType<TrackNavHandler>, default: undefined },
 	},
 	emits: ['load', 'play', 'pause', 'end', 'timeupdate', 'error'],
 	setup(props, { emit, expose }) {
@@ -270,6 +290,13 @@ export const WaveformPlayer = defineComponent({
 		 * import whose token is stale (superseded by a newer mount or by
 		 * unmount) bails instead of attaching a zombie instance. */
 		let mountToken = 0;
+
+		/* Whether a track-nav listener is attached. Read at construction
+		 * (that's when the core registers the Media Session action), so its
+		 * presence is a remount trigger; `computed` only notifies when the
+		 * boolean flips, so swapping one handler for another doesn't. */
+		const hasNextTrack = computed(() => typeof props.onNextTrack === 'function');
+		const hasPreviousTrack = computed(() => typeof props.onPreviousTrack === 'function');
 
 		function teardown() {
 			if (instance && typeof instance.destroy === 'function') {
@@ -324,6 +351,14 @@ export const WaveformPlayer = defineComponent({
 					opts.onTimeUpdate = (c: number, d: number, i: WaveformPlayerInstance) =>
 						emit('timeupdate', c, d, i);
 					opts.onError = (e: Error, i: WaveformPlayerInstance) => emit('error', e, i);
+					/* Track navigation: only when a listener exists; the
+					 * closures read the latest handler. */
+					if (hasNextTrack.value) {
+						opts.onNextTrack = (i: WaveformPlayerInstance) => props.onNextTrack?.(i);
+					}
+					if (hasPreviousTrack.value) {
+						opts.onPreviousTrack = (i: WaveformPlayerInstance) => props.onPreviousTrack?.(i);
+					}
 
 					instance = new Ctor(target, opts);
 				})
@@ -341,7 +376,9 @@ export const WaveformPlayer = defineComponent({
 		/* Re-mount on any construction-prop change. Listed exhaustively
 		 * (mirrors the React wrapper's dep array) so the intent is
 		 * explicit. Callbacks reach the instance via stable `emit`, so
-		 * there's nothing here for them to churn. */
+		 * there's nothing here for them to churn — only the *presence* of
+		 * a track-nav listener is. test/forwarding-drift.test.ts fails if
+		 * a forwarded option is missing here. */
 		watch(
 			() => [
 				props.url,
@@ -355,6 +392,7 @@ export const WaveformPlayer = defineComponent({
 				props.barWidth,
 				props.barSpacing,
 				props.barRadius,
+				props.waveformGradient,
 				props.waveform,
 				props.colorPreset,
 				props.waveformColor,
@@ -366,6 +404,7 @@ export const WaveformPlayer = defineComponent({
 				props.showInfo,
 				props.showTime,
 				props.showHoverTime,
+				props.seekHandle,
 				props.showBPM,
 				props.bpm,
 				props.buttonAlign,
@@ -394,6 +433,8 @@ export const WaveformPlayer = defineComponent({
 				props.enableMediaSession,
 				props.playIcon,
 				props.pauseIcon,
+				hasNextTrack.value,
+				hasPreviousTrack.value,
 			],
 			() => {
 				teardown();
