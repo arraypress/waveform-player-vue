@@ -30,10 +30,13 @@ class MockPlayer {
 	setProgress = vi.fn();
 	loadTrack = vi.fn(async () => {});
 	destroy = vi.fn();
+	/** Optional per-test stand-in for the core's DOM work on the host. */
+	static onConstruct: ((el: HTMLElement) => void) | null = null;
 	constructor(el: HTMLElement, opts: Record<string, unknown>) {
 		this.el = el;
 		this.opts = opts;
 		instances.push(this);
+		MockPlayer.onConstruct?.(el);
 	}
 }
 
@@ -61,6 +64,7 @@ import type { WaveformPlayerProps } from '../src';
 
 beforeEach(() => {
 	instances.length = 0;
+	MockPlayer.onConstruct = null;
 });
 
 describe('WaveformPlayer (Vue)', () => {
@@ -173,6 +177,65 @@ describe('WaveformPlayer (Vue)', () => {
 		expect(el.classList.contains('wfp-host')).toBe(true);
 		expect(el.classList.contains('custom')).toBe(true);
 		expect(el.id).toBe('player-1');
+	});
+
+	/* The core writes its own classes onto the host: createDOM() resets the
+	 * whole list to `waveform-player` (+ `waveform-layout-preview`,
+	 * `waveform-theme-light`), and load/error paths toggle
+	 * `waveform-is-placeholder` later. A class-only change doesn't remount,
+	 * so if Vue re-patched the `class` attribute those would be gone for good. */
+	it('keeps the core-added classes when only the fall-through class changes', async () => {
+		MockPlayer.onConstruct = (el) => {
+			el.className = 'waveform-player';
+			el.classList.add('waveform-layout-preview');
+		};
+		const wrapper = mount(WaveformPlayer, { props: { url: '/a.mp3' }, attrs: { class: 'first' } });
+		await flushPromises();
+		const el = wrapper.find('div').element;
+		el.classList.add('waveform-is-placeholder'); // a later, post-construction toggle
+
+		await wrapper.setProps({ class: 'second' } as never);
+		await flushPromises();
+
+		expect(instances).toHaveLength(1); // no remount to paper over it
+		expect(el.className.split(' ').sort()).toEqual(
+			['second', 'waveform-is-placeholder', 'waveform-layout-preview', 'waveform-player', 'wfp-host'].sort()
+		);
+
+		await wrapper.setProps({ class: undefined } as never);
+		expect(el.className.split(' ').sort()).toEqual(
+			['waveform-is-placeholder', 'waveform-layout-preview', 'waveform-player', 'wfp-host'].sort()
+		);
+	});
+
+	it('re-applies the fall-through class and wfp-host after the core resets the class list', async () => {
+		MockPlayer.onConstruct = (el) => {
+			el.className = 'waveform-player';
+		};
+		const wrapper = mount(WaveformPlayer, {
+			props: { url: '/a.mp3' },
+			attrs: { class: ['mine', { active: true, off: false }] },
+		});
+		await flushPromises();
+		expect(wrapper.find('div').element.className.split(' ').sort()).toEqual(
+			['active', 'mine', 'waveform-player', 'wfp-host'].sort()
+		);
+	});
+
+	it('still forwards non-class attributes to the host', async () => {
+		const onClick = vi.fn();
+		const wrapper = mount(WaveformPlayer, {
+			props: { url: '/a.mp3' },
+			attrs: { id: 'p1', 'data-x': '1', style: 'min-height: 64px', onClick },
+		});
+		const el = wrapper.find('div').element as HTMLDivElement;
+		expect(el.id).toBe('p1');
+		expect(el.dataset.x).toBe('1');
+		expect(el.style.minHeight).toBe('64px');
+		await wrapper.find('div').trigger('click');
+		expect(onClick).toHaveBeenCalledTimes(1);
+		await wrapper.setProps({ id: 'p2' } as never);
+		expect(el.id).toBe('p2');
 	});
 
 	// These props type-check for free (the Props type derives from the core's
