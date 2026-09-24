@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the wrapper has to know whether anyone is listening — the core shows the
   button whenever the option is a function. Adding or removing one remounts the
   player; swapping one handler for another doesn't.
+- **Forwarding-drift test.** `test/forwarding-drift.test.ts` enumerates the
+  installed core's option surface (`DEFAULT_OPTIONS` plus the
+  `WaveformPlayerOptions` keys) and fails for any option that isn't declared
+  and forwarded, doesn't remount on change, or isn't listed in `NOT_FORWARDED`
+  with a reason — so the next core option can't be dropped the way the ones
+  above were. Test-only; adds `@types/node` as a dev dependency.
 
 ### Changed
 

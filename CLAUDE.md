@@ -21,6 +21,11 @@ prop.** Without the declaration Vue treats it as a fallthrough attribute and it
 never reaches `buildLibraryOptions`. Step 3 mirrors React's deps array — omit it
 and the option works on mount but ignores runtime changes.
 
+`test/forwarding-drift.test.ts` enumerates the installed core's option surface
+and fails on any of the three misses. A deliberately unforwarded option goes in
+its `NOT_FORWARDED` map with a reason; a new option with a `null` default needs a
+sample value in `test/core-options.ts` (the test says so).
+
 `PropType<...>` needs a **named** union, imported from core's hand-written
 `index.d.ts` (e.g. `AudioCrossOrigin`, `AudioMode`, `WaveformStyle`). If core only
 has an inline union, export a named one there first — that's a core edit.
