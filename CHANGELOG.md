@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   typed props since the core added them (1.18.0 / 1.17.0), but with no runtime
   prop declaration Vue treated them as fall-through attributes on the `<div>`.
   Both are now declared, forwarded, and in the remount `watch()`.
+- **`setPlaybackRate` documents the real range** — `0.25..4`, what the core
+  clamps to — instead of `0.5..2`.
 
 ## [0.6.0] — 2026-09-22
 

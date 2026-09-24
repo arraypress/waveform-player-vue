@@ -125,7 +125,7 @@ export interface WaveformPlayerExpose {
 	seekToPercent(percent: number): void;
 	/** Set output volume (0..1). Self-mode only. */
 	setVolume(volume: number): void;
-	/** Set playback rate (0.5..2). Self-mode only. */
+	/** Set playback rate (0.25..4 — the core clamps to that range). Self-mode only. */
 	setPlaybackRate(rate: number): void;
 	/** External-mode only: push the play/pause state into the player. */
 	setPlayingState(playing: boolean): void;
